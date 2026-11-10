@@ -9,7 +9,9 @@ A universally user-friendly, responsive web application featuring an interactive
 ✨ Features & Submission Compliance
 
 • Zero Technical Setup for Testers: Built entirely on top of browser-native Web Audio APIs (webkitSpeechRecognition & speechSynthesis). Anyone can open the app on a browser and immediately begin testing without code installations.
+
 • No API Key Exposure: System authentication is processed entirely on a secured, isolated backend layer. Reviewers are never prompted to provide an API key.
+
 • Conversational Logic: Designed to dynamically parse core profile questions using a hardcoded persona prompt layer powered by gpt-4o-mini.
 
 
@@ -17,7 +19,9 @@ A universally user-friendly, responsive web application featuring an interactive
 
 The application forces the underlying LLM to adopt Shivaji's real professional identity in the first person ("I"):
 • Foundations: Computer Science Engineering Graduate (2018) with a modern technical focus in Python, FastAPI, Django, Node.js, and RAG architectures.
+
 • Proven Expertise: Highlighted engineering architectures including DocuShield AI, a live Multi-Agent AI Customer Support System, and an AI Stock Prediction Engine.
+
 • The Leadership Superpower: Over 7.5 years of professional high-stakes operation engineering experience managing critical escalation matrices and leading operational pipelines for engineering teams of 15–22 specialists at PayPal and 247 Customer Pvt. Ltd.
 
 
@@ -34,8 +38,11 @@ You can click the microphone button and ask the bot any variation of the followi
 🛠️ Tech Stack & Modular Structure
 
 The project is architected with a decoupled frontend interface served securely under a single origin by a fast backend application layer to handle secure SSL data flow:
+
 • Frontend (index.html): Self-contained, responsive layout with embedded CSS. Leverages browser native Web Speech APIs for speech-to-text transcription and text-to-speech outputs.
+
 • Backend Framework (main.py): Structured utilizing FastAPI, enabling strict typed data verification through Pydantic and safe multi-origin resource sharing via CORS middleware.
+
 • Core API Client: Asynchronous openai SDK configuration communicating securely with backend system configurations.
 
 interview-voicebot/
