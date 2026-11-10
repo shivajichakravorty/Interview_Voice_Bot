@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shivaji's AI Interview Voice Bot</title>
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 16px;
+            box-sizing: border-box;
+        }
+        .card {
+            max-width: 500px;
+            width: 100%;
+            background-color: #1e293b;
+            border-radius: 16px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            padding: 32px;
+            border: 1px solid #334155;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0 0 4px 0;
+            color: #818cf8;
+        }
+        .subtitle {
+            color: #94a3b8;
+            margin: 0 0 24px 0;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+        }
+        .status-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 32px;
+        }
+        .status-light {
+            height: 12px;
+            width: 12px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        .bg-green { background-color: #22c55e; }
+        .bg-red { background-color: #ef4444; }
+        .bg-yellow { background-color: #eab308; }
+        .bg-blue { background-color: #3b82f6; }
+        .bg-amber { background-color: #f59e0b; }
+        
+        .status-text {
+            font-size: 14px;
+            font-weight: 500;
+            color: #cbd5e1;
+            margin: 0;
+        }
+        .mic-button {
+            width: 96px;
+            height: 96px;
+            background-color: #4f46e5;
+            color: #ffffff;
+            border: 4px solid #334155;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin: 0 auto 32px auto;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            outline: none;
+        }
+        .mic-button:hover {
+            background-color: #6366f1;
+        }
+        .mic-button:active {
+            transform: scale(0.95);
+        }
+        .mic-icon {
+            width: 40px;
+            height: 40px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .display-box {
+            background-color: #0f172a;
+            border-radius: 12px;
+            padding: 16px;
+            text-align: left;
+            border: 1px solid #334155;
+            min-height: 100px;
+            box-sizing: border-box;
+        }
+        .display-label {
+            font-size: 12px;
+            color: #818cf8;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.7px;
+            margin: 0 0 8px 0;
+        }
+        .output-text {
+            color: #cbd5e1;
+            font-style: italic;
+            font-size: 14px;
+            margin: 0;
+            line-height: 1.5;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h1>Shivaji Chakravorty</h1>
+        <p class="subtitle">AI Voice Bot Assistant — Interview Simulation</p>
+
+        <!-- Dynamic Status Indicator -->
+        <div class="status-container">
+            <span id="status-light" class="status-light bg-green"></span>
+            <p id="status-text" class="status-text">Ready to talk</p>
+        </div>
+
+        <!-- Central Microphone Button -->
+        <button id="mic-btn" class="mic-button">
+            <svg class="mic-icon" viewBox="0 0 24 24">
+                <path d="M19 11a7 7 0 0 1-7 7m0 0a7 7 0 0 1-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 0 1-3-3V5a3 3 0 1 16 0v6a3 3 0 0 1-3 3z"></path>
+            </svg>
+        </button>
+
+        <!-- Transcription & Dialogue Display -->
+        <div class="display-box">
+            <p class="display-label">Transcript / Bot Response</p>
+            <p id="output-text" class="output-text">"Tap the microphone and ask me any question from the prompt list!"</p>
+        </div>
+    </div>
+
+    <script>
+        const micBtn = document.getElementById('mic-btn');
+        const statusText = document.getElementById('status-text');
+        const statusLight = document.getElementById('status-light');
+        const outputText = document.getElementById('output-text');
+        
+        const BACKEND_URL = "http://127.0.0.1:8000/api/chat"; // Ensure this matches your FastAPI endpoint
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        
+        if (!SpeechRecognition) {
+            outputText.innerText = "Speech recognition is unsupported in this browser. Please open this app in Google Chrome or Safari.";
+        } else {
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'en-US';
+            recognition.interimResults = false;
+
+            micBtn.addEventListener('click', () => {
+                try {
+                    window.speechSynthesis.cancel(); 
+                    recognition.start();
+                    updateStatus("Listening closely...", "bg-red animate-pulse");
+                } catch (e) {
+                    console.log("Recognition already active");
+                }
+            });
+
+            recognition.onresult = async (event) => {
+                const userQuery = event.results[0][0].transcript;
+                outputText.innerText = `You: "${userQuery}"`;
+                updateStatus("Thinking...", "bg-yellow animate-pulse");
+
+                try {
+                    const response = await fetch(BACKEND_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message: userQuery })
+                    });
+                    const data = await response.json();
+                    
+                    outputText.innerText = data.reply;
+                    updateStatus("Speaking...", "bg-blue animate-pulse");
+                    speakAloud(data.reply);
+                } catch (err) {
+                    outputText.innerText = "Error connecting to the backend. Ensure your server is running.";
+                    updateStatus("Ready to talk", "bg-green");
+                }
+            };
+
+            recognition.onerror = (event) => {
+                console.error("Speech Recognition Error: ", event.error);
+                updateStatus("Audio catch failed. Try again.", "bg-amber");
+                setTimeout(() => updateStatus("Ready to talk", "bg-green"), 2000);
+            };
+        }
+
+        function speakAloud(text) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.onend = () => updateStatus("Ready to talk", "bg-green");
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function updateStatus(text, statusClass) {
+            statusText.innerText = text;
+            statusLight.className = `status-light ${statusClass}`;
+        }
+    </script>
+</body>
+</html>
